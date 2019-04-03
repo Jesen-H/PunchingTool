@@ -4,6 +4,15 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
+import com.hjq.punching.R;
+import com.hjq.punching.weight.MyTitleBar;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import butterknife.ButterKnife;
+
 /**
  * @Describe：
  * @Date：2019-04-02
@@ -17,8 +26,10 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
             getSupportActionBar().hide();
         }
         setContentView(setLayout());
+        ButterKnife.bind(this);
         initView();
         setListener();
+        EventBus.getDefault().register(this);
     }
 
     protected abstract int setLayout();
@@ -45,5 +56,16 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
     @Override
     public void hideLoading() {
 
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(BaseEvent event){
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 }

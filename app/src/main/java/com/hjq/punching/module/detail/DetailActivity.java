@@ -8,10 +8,6 @@ import com.hjq.punching.base.BaseActivity;
  * @Date：2019-04-02
  */
 public class DetailActivity extends BaseActivity {
-    @Override
-    protected int getAppTheme() {
-        return 0;
-    }
 
     @Override
     protected int setLayout() {
