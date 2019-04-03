@@ -4,28 +4,40 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/color_f8f8f8"
     tools:context=".module.main.MainActivity">
 
-    <com.hjq.punching.weight.MyTitleBar
+    <com.hjq.punching.weight.view.MyTitleBar
         android:id="@+id/title_bar"
         android:layout_width="0dp"
-        android:layout_height="@dimen/y100"
+        android:layout_height="50dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:title_text="@string/text_record" />
+
+    <TextView
+        android:id="@+id/tv_amount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/x30"
+        android:layout_marginTop="@dimen/x20"
+        android:textColor="@color/color_555555"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/title_bar" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_record"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="@dimen/x20"
+        android:layout_margin="@dimen/x20"
         android:overScrollMode="never"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title_bar">
+        app:layout_constraintTop_toBottomOf="@+id/tv_amount">
 
     </android.support.v7.widget.RecyclerView>
-
 
 </android.support.constraint.ConstraintLayout>

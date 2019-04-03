@@ -4,8 +4,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
-import com.hjq.punching.R;
-import com.hjq.punching.weight.MyTitleBar;
+import com.hjq.punching.MyApplication;
+import com.hjq.punching.weight.Config;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -18,6 +18,7 @@ import butterknife.ButterKnife;
  * @Date：2019-04-02
  */
 public abstract class BaseActivity extends AppCompatActivity implements BaseView {
+    private String punch_record;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -59,7 +60,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(BaseEvent event){
+    public void onEvent(BaseEvent event) {
 
     }
 
@@ -67,5 +68,9 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
+    }
+
+    public String getPunch_record() {
+        return MyApplication.getSp().getString(Config.PUNCH_RECORD, "");
     }
 }

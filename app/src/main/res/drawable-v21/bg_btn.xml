@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/color_009C84" />
-    <corners android:radius="@dimen/x50" />
-    <size
-        android:width="@dimen/x10"
-        android:height="@dimen/x10" />
-</shape>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/color_009C84">
+    <item>
+        <shape>
+            <solid android:color="@color/color_00B89C" />
+            <corners android:radius="@dimen/x50" />
+            <size
+                android:width="@dimen/x10"
+                android:height="@dimen/x10" />
+        </shape>
+    </item>
+</ripple>

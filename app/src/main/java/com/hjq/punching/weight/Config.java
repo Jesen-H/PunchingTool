@@ -6,4 +6,5 @@ package com.hjq.punching.weight;
  */
 public class Config {
     public static final String APP_THEME = "APP_THEME";
+    public static final String PUNCH_RECORD = "PUNCH_RECORD";
 }

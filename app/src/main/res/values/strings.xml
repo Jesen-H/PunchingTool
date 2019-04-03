@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">PunchingTool</string>
+
+    <string name="text_record">打卡记录</string>
+    <string name="text_add_data">请添加数据哦~</string>
+    <string name="text_tv_record">打卡</string>
 </resources>

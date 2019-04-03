@@ -1,4 +1,4 @@
-package com.hjq.punching.weight;
+package com.hjq.punching.weight.view;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -6,7 +6,6 @@ import android.support.constraint.ConstraintLayout;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.hjq.punching.R;
@@ -27,7 +26,7 @@ public class MyTitleBar extends ConstraintLayout {
     public interface OnTitleBarClickListener {
         void onBack();
 
-        void onSetting();
+        void onSetting(ConstraintLayout setting);
     }
 
     public void setOnTitleBarClickListener(OnTitleBarClickListener listener) {
@@ -72,7 +71,7 @@ public class MyTitleBar extends ConstraintLayout {
             @Override
             public void onClick(View v) {
                 if (listener != null) {
-                    listener.onSetting();
+                    listener.onSetting(constraint_setting);
                 }
             }
         });
