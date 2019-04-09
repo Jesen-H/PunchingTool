@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.hjq.punching.MyApplication;
 import com.hjq.punching.weight.Config;
+import com.hjq.punching.weight.view.MyDateView;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -72,5 +73,9 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
 
     public String getPunch_record() {
         return MyApplication.getSp().getString(Config.PUNCH_RECORD, "");
+    }
+
+    public String getPunch_detail(String name) {
+        return MyApplication.getSp().getString(name, "");
     }
 }

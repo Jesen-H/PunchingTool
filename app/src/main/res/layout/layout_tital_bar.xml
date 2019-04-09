@@ -45,9 +45,10 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
+            android:id="@+id/image_setting"
             android:layout_width="@dimen/x60"
             android:layout_height="@dimen/y60"
-            android:layout_marginStart="@dimen/x50"
+            android:layout_marginStart="@dimen/x190"
             android:layout_marginEnd="@dimen/x30"
             android:src="@drawable/ic_setting"
             app:layout_constraintBottom_toBottomOf="parent"

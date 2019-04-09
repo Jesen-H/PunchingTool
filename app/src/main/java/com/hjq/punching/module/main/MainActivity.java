@@ -1,6 +1,9 @@
 package com.hjq.punching.module.main;
 
 
+import android.Manifest;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
@@ -12,18 +15,24 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.hjq.punching.MyApplication;
 import com.hjq.punching.R;
 import com.hjq.punching.adapter.PunchRecodeAdapter;
 import com.hjq.punching.base.BaseActivity;
+import com.hjq.punching.base.BaseEvent;
+import com.hjq.punching.bean.PunchDetail;
 import com.hjq.punching.bean.PunchRecord;
+import com.hjq.punching.module.detail.DetailActivity;
 import com.hjq.punching.weight.Config;
+import com.hjq.punching.weight.util.DateUtils;
 import com.hjq.punching.weight.view.MyPopupWindow;
 import com.hjq.punching.weight.view.MyTitleBar;
 import com.hjq.punching.weight.util.SpUtils;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -85,14 +94,6 @@ public class MainActivity extends BaseActivity {
 
             @Override
             public void onSetting(ConstraintLayout setting) {
-//                List<PunchRecord> punchRecords = new ArrayList<>();
-//                PunchRecord record = new PunchRecord();
-//                record.setName("测试");
-//                record.setPunch(false);
-//                punchRecords.add(record);
-//                recodeAdapter.addData(punchRecords);
-//                setText();
-//                SpUtils.putSp(Config.PUNCH_RECORD, MyApplication.getGson().toJson(recodeAdapter.getData()));
                 if (popupWindow == null) {
                     popupWindow = new MyPopupWindow(MainActivity.this);
                 }
@@ -101,6 +102,12 @@ public class MainActivity extends BaseActivity {
                 popupWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
                 popupWindow.setBackgroundDrawable(new ColorDrawable());
                 popupWindow.show(setting);
+            }
+        });
+        recodeAdapter.setOnItemClickListener(new PunchRecodeAdapter.OnItemClickListener() {
+            @Override
+            public void onRecord(String name) {
+                startActivity(new Intent(MainActivity.this, DetailActivity.class));
             }
         });
         recodeAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
@@ -112,6 +119,46 @@ public class MainActivity extends BaseActivity {
                         setText();
                         recodeAdapter.updatePunch(position);
                         SpUtils.putSp(Config.PUNCH_RECORD, MyApplication.getGson().toJson(recodeAdapter.getData()));
+
+                        String name = recodeAdapter.getData().get(position).getName();
+                        List<PunchDetail> detailList = null;
+                        PunchDetail.Days.DetailBean bean = new PunchDetail.Days.DetailBean();
+
+                        bean.setName(name);
+                        bean.setTime(DateUtils.getSystemDate());
+                        bean.setRemark("");
+
+                        String json = getPunch_detail(Config.PUNCH_RECORD_DATE);
+                        if (!TextUtils.isEmpty(json)) {
+                            String date = DateUtils.getSystemYear() + "年-" + DateUtils.getSystemMonth() + "月";
+                            detailList = MyApplication.getGson().fromJson(json, new TypeToken<List<PunchDetail>>() {
+                            }.getType());
+
+                            boolean isDayExist = false;
+                            boolean isMonthExist = false;
+                            for (PunchDetail pd : detailList) {
+                                if (pd.getDate().equals(date)) {
+                                    for (PunchDetail.Days days : pd.getDays()) {
+                                        if (days.getDay().equals(DateUtils.getDays() + "")) {
+                                            List<PunchDetail.Days.DetailBean> detail = days.getDetailBeans();
+                                            detail.add(bean);
+                                            isDayExist = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!isDayExist) {
+                                        List<PunchDetail.Days> daysList = pd.getDays();
+
+                                        daysList.add(DateUtils.getDays() + "");
+                                    }
+                                    break;
+                                }
+                            }
+                        } else {
+
+                        }
+
+                        SpUtils.putSp(Config.PUNCH_RECORD_DATE, MyApplication.getGson().toJson(detailList));
                         break;
                 }
             }
@@ -127,5 +174,16 @@ public class MainActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         // TODO: add setContentView(...) invocation
         ButterKnife.bind(this);
+    }
+
+    @Override
+    public void onEvent(BaseEvent event) {
+        super.onEvent(event);
+        if (event.getString().equals(Config.CREATE_RECORD)) {
+            List<PunchRecord> punchRecords = (List<PunchRecord>) event.getObject();
+            recodeAdapter.addData(punchRecords);
+            setText();
+            SpUtils.putSp(Config.PUNCH_RECORD, MyApplication.getGson().toJson(recodeAdapter.getData()));
+        }
     }
 }

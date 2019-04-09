@@ -14,15 +14,33 @@ import com.hjq.punching.bean.PunchRecord;
  */
 public class PunchRecodeAdapter extends BaseQuickAdapter<PunchRecord, BaseViewHolder> {
 
+    private OnItemClickListener listener;
+
+    public interface OnItemClickListener {
+        void onRecord(String name);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
+    }
+
     public PunchRecodeAdapter() {
         super(R.layout.item_record);
     }
 
     @Override
-    protected void convert(BaseViewHolder helper, PunchRecord item) {
+    protected void convert(final BaseViewHolder helper, final PunchRecord item) {
         helper.getView(R.id.btn_card).setVisibility(item.isPunch() ? View.GONE : View.VISIBLE);
         helper.setText(R.id.tv_record_name, item.getName())
-                .addOnClickListener(R.id.btn_card);
+                .addOnClickListener(R.id.btn_card)
+                .getView(R.id.container_view).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (listener != null) {
+                    listener.onRecord(item.getName());
+                }
+            }
+        });
     }
 
     public void updatePunch(int position) {
@@ -32,8 +50,8 @@ public class PunchRecodeAdapter extends BaseQuickAdapter<PunchRecord, BaseViewHo
 
     public int getPunchNumber() {
         int num = 0;
-        for (PunchRecord record : getData()){
-            if (record.isPunch()){
+        for (PunchRecord record : getData()) {
+            if (record.isPunch()) {
                 num++;
             }
         }
