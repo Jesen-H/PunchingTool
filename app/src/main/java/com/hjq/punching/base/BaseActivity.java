@@ -19,7 +19,6 @@ import butterknife.ButterKnife;
  * @Date：2019-04-02
  */
 public abstract class BaseActivity extends AppCompatActivity implements BaseView {
-    private String punch_record;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

@@ -53,7 +53,6 @@ public class DetailActivity extends BaseActivity {
         }.getType());
 
         dateView.setData(details);
-        dateView.putData(DateUtils.getSystemYear(), DateUtils.getSystemMonth());
 
         detailAdapter = new PunchDetailAdapter();
         rvDateDetail.setLayoutManager(new LinearLayoutManager(this));

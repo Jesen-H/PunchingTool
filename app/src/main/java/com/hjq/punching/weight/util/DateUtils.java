@@ -33,9 +33,9 @@ public class DateUtils {
                 return 30;
             case 2:
                 if (calendar.isLeapYear(year)) {
-                    return  29;
+                    return 29;
                 } else {
-                    return  28;
+                    return 28;
                 }
         }
         return 0;
@@ -58,9 +58,32 @@ public class DateUtils {
         return Integer.parseInt(time.substring(time.lastIndexOf("-") + 1, time.length()));
     }
 
-    public static String getSystemDate(){
+    public static String getSystemDate() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date date = new Date();
         return sdf.format(date);
+    }
+
+    public static List<RecordDay> getRecordDays() {
+        List<RecordDay> list = new ArrayList<>();
+        int oldYear = 2018;
+        int currentYear = getSystemYear();
+        for (int i = oldYear; i <= currentYear; i++) {
+            for (int j = 1; j <= 12; j++) {
+                int dateLongDay = getDateLongDay(i, j);
+                for (int k = 1; k <= dateLongDay; k++) {
+                    RecordDay days = new RecordDay();
+                    days.setName(i + "年-" + j + "月");
+                    List<RecordDay.Days> daysList = new ArrayList<>();
+                    RecordDay.Days day = new RecordDay.Days();
+                    day.setDay(k + "");
+                    day.setPunch(false);
+                    daysList.add(day);
+                    days.setDaysList(daysList);
+                    list.add(days);
+                }
+            }
+        }
+        return list;
     }
 }

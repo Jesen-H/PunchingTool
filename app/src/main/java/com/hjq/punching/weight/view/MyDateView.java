@@ -6,6 +6,7 @@ import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,8 @@ import android.widget.Toast;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
+import com.google.gson.reflect.TypeToken;
+import com.hjq.punching.MyApplication;
 import com.hjq.punching.R;
 import com.hjq.punching.bean.PunchDetail;
 import com.hjq.punching.bean.RecordDay;
@@ -45,7 +48,9 @@ public class MyDateView extends ConstraintLayout {
     private SimpleDateFormat sdf;
     private String time = "";
 
-    private BaseQuickAdapter<RecordDay, BaseViewHolder> adapter;
+    private List<RecordDay> recordDays;
+
+    private BaseQuickAdapter<RecordDay.Days, BaseViewHolder> adapter;
 
     public MyDateView(Context context) {
         super(context);
@@ -65,7 +70,13 @@ public class MyDateView extends ConstraintLayout {
     }
 
     private void initView(View view) {
-        year = DateUtils.getSystemYear();
+        String json = MyApplication.getSp().getString(Config.AMOUNT_DATE, "");
+        if (TextUtils.isEmpty(json)) {
+            MyApplication.getSp().edit().putString(Config.AMOUNT_DATE, MyApplication.getGson().toJson(DateUtils.getRecordDays())).apply();
+        } else {
+            recordDays = MyApplication.getGson().fromJson(json, new TypeToken<List<RecordDay>>() {
+            }.getType());
+        }
         month = DateUtils.getSystemMonth();
 
         rv_date = view.findViewById(R.id.rv_date);
@@ -75,46 +86,24 @@ public class MyDateView extends ConstraintLayout {
 
         tv_date.setText(DateUtils.getSystemYear() + "年-" + DateUtils.getSystemMonth() + "月");
         rv_date.setLayoutManager(new GridLayoutManager(mContext, 8, LinearLayoutManager.VERTICAL, false));
-        rv_date.setAdapter(adapter = new BaseQuickAdapter<RecordDay, BaseViewHolder>(R.layout.item_date) {
+        rv_date.setAdapter(adapter = new BaseQuickAdapter<RecordDay.Days, BaseViewHolder>(R.layout.item_date) {
             @Override
-            protected void convert(BaseViewHolder helper, RecordDay item) {
+            protected void convert(BaseViewHolder helper, RecordDay.Days item) {
                 int normal = getResources().getColor(R.color.color_333333);
                 int record = getResources().getColor(R.color.color_009C84);
                 helper.setTextColor(R.id.tv_day, item.isPunch() ? record : normal).setText(R.id.tv_day, item.getDay());
             }
         });
+        for (RecordDay recordDay : recordDays) {
+            if (recordDay.getName().equals(tv_date.getText().toString())) {
+                adapter.setNewData(recordDay.getDaysList());
+                break;
+            }
+        }
     }
 
     public void setData(List<PunchDetail> punchDetails) {
         this.punchDetails = punchDetails;
-    }
-
-    public void putData(int year, int month) {
-        String time = year + "年-" + month + "月";
-        int size = DateUtils.getDateLongDay(year, month);
-
-        PunchDetail punchDetail = null;
-        for (PunchDetail detail : punchDetails) {
-            if (detail.getDate().equals(time)) {
-                punchDetail = detail;
-            }
-        }
-        List<RecordDay> list = new ArrayList<>();
-        for (int i = 1; i <= size; i++) {
-            RecordDay recordDay = new RecordDay();
-            recordDay.setPunch(false);
-            if (punchDetail != null) {
-                for (int j = 0; j < punchDetail.getDays().size(); j++) {
-                    if (Integer.parseInt(punchDetail.getDays().get(j).getDay()) == i) {
-                        recordDay.setPunch(true);
-                        break;
-                    }
-                }
-            }
-            recordDay.setDay(i + "");
-            list.add(recordDay);
-        }
-        adapter.setNewData(list);
     }
 
     private void setListener() {
@@ -149,8 +138,8 @@ public class MyDateView extends ConstraintLayout {
                 } else {
                     month++;
                 }
-                putData(year, month);
                 tv_date.setText(year + "年-" + month + "月");
+                getData(tv_date.getText().toString());
             }
         });
         last.setOnClickListener(new OnClickListener() {
@@ -165,9 +154,18 @@ public class MyDateView extends ConstraintLayout {
                 } else {
                     month--;
                 }
-                putData(year, month);
                 tv_date.setText(year + "年-" + month + "月");
+                getData(tv_date.getText().toString());
             }
         });
+    }
+
+    private void getData(String date) {
+        for (RecordDay day : recordDays) {
+            if (day.getName().equals(date)){
+                adapter.setNewData(day.getDaysList());
+                return;
+            }
+        }
     }
 }
