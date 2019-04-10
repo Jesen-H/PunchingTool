@@ -1,5 +1,7 @@
 package com.hjq.punching.weight.util;
 
+import com.hjq.punching.bean.RecordDay;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;

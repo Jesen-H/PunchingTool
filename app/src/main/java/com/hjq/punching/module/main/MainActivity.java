@@ -121,7 +121,7 @@ public class MainActivity extends BaseActivity {
                         SpUtils.putSp(Config.PUNCH_RECORD, MyApplication.getGson().toJson(recodeAdapter.getData()));
 
                         String name = recodeAdapter.getData().get(position).getName();
-                        List<PunchDetail> detailList = null;
+                        List<PunchDetail> detailList;
                         PunchDetail.Days.DetailBean bean = new PunchDetail.Days.DetailBean();
 
                         bean.setName(name);
@@ -135,7 +135,6 @@ public class MainActivity extends BaseActivity {
                             }.getType());
 
                             boolean isDayExist = false;
-                            boolean isMonthExist = false;
                             for (PunchDetail pd : detailList) {
                                 if (pd.getDate().equals(date)) {
                                     for (PunchDetail.Days days : pd.getDays()) {
@@ -148,14 +147,35 @@ public class MainActivity extends BaseActivity {
                                     }
                                     if (!isDayExist) {
                                         List<PunchDetail.Days> daysList = pd.getDays();
+                                        PunchDetail.Days days = new PunchDetail.Days();
+                                        days.setDay(DateUtils.getDays() + "");
 
-                                        daysList.add(DateUtils.getDays() + "");
+                                        List<PunchDetail.Days.DetailBean> detail = new ArrayList<>();
+                                        detail.add(bean);
+
+                                        days.setDetailBeans(detail);
+                                        daysList.add(days);
                                     }
                                     break;
                                 }
                             }
                         } else {
+                            detailList = new ArrayList<>();
+                            List<PunchDetail.Days> daysList = new ArrayList<>();
+                            List<PunchDetail.Days.DetailBean> detailBeanList = new ArrayList<>();
 
+                            detailBeanList.add(bean);
+
+                            PunchDetail.Days days = new PunchDetail.Days();
+                            days.setDay(DateUtils.getDays() + "");
+                            days.setDetailBeans(detailBeanList);
+                            daysList.add(days);
+
+                            PunchDetail punchDetail = new PunchDetail();
+                            punchDetail.setDate(DateUtils.getSystemYear() + "年-" + DateUtils.getSystemMonth() + "月");
+                            punchDetail.setDays(daysList);
+
+                            detailList.add(punchDetail);
                         }
 
                         SpUtils.putSp(Config.PUNCH_RECORD_DATE, MyApplication.getGson().toJson(detailList));

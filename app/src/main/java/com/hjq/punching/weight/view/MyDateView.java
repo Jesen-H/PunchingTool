@@ -11,14 +11,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.hjq.punching.R;
+import com.hjq.punching.bean.PunchDetail;
 import com.hjq.punching.bean.RecordDay;
+import com.hjq.punching.weight.Config;
 import com.hjq.punching.weight.util.DateUtils;
+import com.hjq.punching.weight.util.EventUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -34,6 +41,9 @@ public class MyDateView extends ConstraintLayout {
 
     private int year = 0;
     private int month = 0;
+    private List<PunchDetail> punchDetails;
+    private SimpleDateFormat sdf;
+    private String time = "";
 
     private BaseQuickAdapter<RecordDay, BaseViewHolder> adapter;
 
@@ -75,12 +85,32 @@ public class MyDateView extends ConstraintLayout {
         });
     }
 
-    public void setData(List<RecordDay> dayList){
-        int size = DateUtils.getDateLongDay(DateUtils.getSystemYear(), DateUtils.getSystemMonth());
+    public void setData(List<PunchDetail> punchDetails) {
+        this.punchDetails = punchDetails;
+    }
+
+    public void putData(int year, int month) {
+        String time = year + "年-" + month + "月";
+        int size = DateUtils.getDateLongDay(year, month);
+
+        PunchDetail punchDetail = null;
+        for (PunchDetail detail : punchDetails) {
+            if (detail.getDate().equals(time)) {
+                punchDetail = detail;
+            }
+        }
         List<RecordDay> list = new ArrayList<>();
         for (int i = 1; i <= size; i++) {
             RecordDay recordDay = new RecordDay();
             recordDay.setPunch(false);
+            if (punchDetail != null) {
+                for (int j = 0; j < punchDetail.getDays().size(); j++) {
+                    if (Integer.parseInt(punchDetail.getDays().get(j).getDay()) == i) {
+                        recordDay.setPunch(true);
+                        break;
+                    }
+                }
+            }
             recordDay.setDay(i + "");
             list.add(recordDay);
         }
@@ -90,34 +120,52 @@ public class MyDateView extends ConstraintLayout {
     private void setListener() {
         adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-
+            public void onItemClick(BaseQuickAdapter baseQuickAdapter, View view, int position) {
+                for (PunchDetail detail : punchDetails) {
+                    if (detail.getDate().equals(tv_date.getText().toString())) {
+                        String day = adapter.getData().get(position).getDay();
+                        for (PunchDetail.Days days : detail.getDays()) {
+                            if (days.getDay().equals(day)) {
+                                EventUtils.post(Config.PUNCH_DATE_DETAIL, days.getDetailBeans());
+                                return;
+                            }
+                        }
+                    }
+                }
             }
         });
 
         next.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (year == DateUtils.getSystemYear()) {
+                    if (month == DateUtils.getSystemMonth()) {
+                        return;
+                    }
+                }
                 if (month == 12) {
                     month = 1;
                     year++;
                 } else {
                     month++;
                 }
-                adapter.setNewData(DateUtils.getDateLongDay(year, month));
+                putData(year, month);
                 tv_date.setText(year + "年-" + month + "月");
             }
         });
         last.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (year == 2018 && month == 1) {
+                    return;
+                }
                 if (month == 1) {
                     month = 12;
                     year--;
                 } else {
                     month--;
                 }
-                adapter.setNewData(DateUtils.getDateLongDay(year, month));
+                putData(year, month);
                 tv_date.setText(year + "年-" + month + "月");
             }
         });

@@ -2,15 +2,20 @@ package com.hjq.punching.module.detail;
 
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 import com.google.gson.reflect.TypeToken;
 import com.hjq.punching.MyApplication;
 import com.hjq.punching.R;
+import com.hjq.punching.adapter.PunchDetailAdapter;
 import com.hjq.punching.base.BaseActivity;
+import com.hjq.punching.base.BaseEvent;
 import com.hjq.punching.bean.PunchDetail;
 import com.hjq.punching.bean.RecordDay;
 import com.hjq.punching.weight.Config;
+import com.hjq.punching.weight.MyDividerItem;
+import com.hjq.punching.weight.util.DateUtils;
 import com.hjq.punching.weight.view.MyDateView;
 import com.hjq.punching.weight.view.MyTitleBar;
 
@@ -34,6 +39,7 @@ public class DetailActivity extends BaseActivity {
     RecyclerView rvDateDetail;
 
     private List<PunchDetail> details;
+    private PunchDetailAdapter detailAdapter;
 
     @Override
     protected int setLayout() {
@@ -42,14 +48,16 @@ public class DetailActivity extends BaseActivity {
 
     @Override
     protected void initView() {
-        details = MyApplication.getGson().fromJson(Config.PUNCH_RECORD_DATE, new TypeToken<List<PunchDetail>>() {
+        String json = getPunch_detail(Config.PUNCH_RECORD_DATE);
+        details = MyApplication.getGson().fromJson(json, new TypeToken<List<PunchDetail>>() {
         }.getType());
 
-        List<String> list = new ArrayList<>();
-        for (PunchDetail pd : details) {
-            list.add(pd.getDays());
-        }
-        dateView.setData(dayList);
+        dateView.setData(details);
+        dateView.putData(DateUtils.getSystemYear(), DateUtils.getSystemMonth());
+
+        detailAdapter = new PunchDetailAdapter();
+        rvDateDetail.setLayoutManager(new LinearLayoutManager(this));
+        rvDateDetail.setAdapter(detailAdapter);
     }
 
     @Override
@@ -65,6 +73,15 @@ public class DetailActivity extends BaseActivity {
 
             }
         });
+    }
+
+    @Override
+    public void onEvent(BaseEvent event) {
+        super.onEvent(event);
+        if (event.getString().equals(Config.PUNCH_DATE_DETAIL)) {
+            List<PunchDetail.Days.DetailBean> detailBean = (List<PunchDetail.Days.DetailBean>) event.getObject();
+            detailAdapter.setNewData(detailBean);
+        }
     }
 
     @Override

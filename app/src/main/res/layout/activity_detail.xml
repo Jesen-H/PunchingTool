@@ -14,8 +14,8 @@
     <com.hjq.punching.weight.view.MyDateView
         android:id="@+id/date_view"
         android:layout_width="0dp"
-        android:layout_height="@dimen/y460"
-        android:layout_margin="@dimen/x60"
+        android:layout_height="@dimen/y480"
+        android:layout_margin="@dimen/x80"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/title_bar" />
@@ -24,8 +24,9 @@
         android:id="@+id/rv_date_detail"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_margin="@dimen/x40"
+        android:layout_marginTop="@dimen/x40"
         android:overScrollMode="never"
+        android:padding="@dimen/x40"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
