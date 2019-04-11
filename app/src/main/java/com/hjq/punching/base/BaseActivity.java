@@ -18,7 +18,7 @@ import butterknife.ButterKnife;
  * @Describe：
  * @Date：2019-04-02
  */
-public abstract class BaseActivity extends AppCompatActivity implements BaseView {
+public abstract class BaseActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,25 +39,6 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
 
     protected abstract void setListener();
 
-    @Override
-    public void showToast() {
-
-    }
-
-    @Override
-    public void showMsg() {
-
-    }
-
-    @Override
-    public void showLoading() {
-
-    }
-
-    @Override
-    public void hideLoading() {
-
-    }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(BaseEvent event) {

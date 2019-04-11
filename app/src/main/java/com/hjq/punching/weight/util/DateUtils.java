@@ -59,9 +59,27 @@ public class DateUtils {
     }
 
     public static String getSystemDate() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = new Date();
         return sdf.format(date);
+    }
+
+    public static List<RecordDay> getRecordDays(List<RecordDay> recordDays) {
+        int year = getSystemYear();
+        int month = getSystemMonth();
+        int dateLongDay = getDateLongDay(year, month);
+        RecordDay days = new RecordDay();
+        days.setName(year + "年-" + month + "月");
+        List<RecordDay.Days> daysList = new ArrayList<>();
+        for (int k = 1; k <= dateLongDay; k++) {
+            RecordDay.Days day = new RecordDay.Days();
+            day.setDay(k + "");
+            day.setPunch(false);
+            daysList.add(day);
+        }
+        days.setDaysList(daysList);
+        recordDays.add(days);
+        return recordDays;
     }
 
     public static List<RecordDay> getRecordDays() {
@@ -70,18 +88,18 @@ public class DateUtils {
         int currentYear = getSystemYear();
         for (int i = oldYear; i <= currentYear; i++) {
             for (int j = 1; j <= 12; j++) {
+                RecordDay days = new RecordDay();
                 int dateLongDay = getDateLongDay(i, j);
+                days.setName(i + "年-" + j + "月");
+                List<RecordDay.Days> daysList = new ArrayList<>();
                 for (int k = 1; k <= dateLongDay; k++) {
-                    RecordDay days = new RecordDay();
-                    days.setName(i + "年-" + j + "月");
-                    List<RecordDay.Days> daysList = new ArrayList<>();
                     RecordDay.Days day = new RecordDay.Days();
                     day.setDay(k + "");
                     day.setPunch(false);
                     daysList.add(day);
-                    days.setDaysList(daysList);
-                    list.add(days);
                 }
+                days.setDaysList(daysList);
+                list.add(days);
             }
         }
         return list;

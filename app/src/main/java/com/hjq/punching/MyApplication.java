@@ -13,6 +13,8 @@ import com.google.gson.Gson;
  */
 public class MyApplication extends Application {
 
+    @SuppressLint("StaticFieldLeak")
+    private static Context context;
     private static SharedPreferences sp;
     private static Gson gson;
 
@@ -20,6 +22,7 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
+        context = getApplicationContext();
         gson = new Gson();
         sp = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
     }
@@ -30,5 +33,9 @@ public class MyApplication extends Application {
 
     public static Gson getGson() {
         return gson;
+    }
+
+    public static Context getContext() {
+        return context;
     }
 }

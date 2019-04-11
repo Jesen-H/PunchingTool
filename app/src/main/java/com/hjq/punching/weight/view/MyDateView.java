@@ -20,6 +20,7 @@ import com.google.gson.reflect.TypeToken;
 import com.hjq.punching.MyApplication;
 import com.hjq.punching.R;
 import com.hjq.punching.bean.PunchDetail;
+import com.hjq.punching.bean.PunchRecord;
 import com.hjq.punching.bean.RecordDay;
 import com.hjq.punching.weight.Config;
 import com.hjq.punching.weight.util.DateUtils;
@@ -45,8 +46,6 @@ public class MyDateView extends ConstraintLayout {
     private int year = 0;
     private int month = 0;
     private List<PunchDetail> punchDetails;
-    private SimpleDateFormat sdf;
-    private String time = "";
 
     private List<RecordDay> recordDays;
 
@@ -70,14 +69,27 @@ public class MyDateView extends ConstraintLayout {
     }
 
     private void initView(View view) {
+        month = DateUtils.getSystemMonth();
+        year = DateUtils.getSystemYear();
+
         String json = MyApplication.getSp().getString(Config.AMOUNT_DATE, "");
         if (TextUtils.isEmpty(json)) {
-            MyApplication.getSp().edit().putString(Config.AMOUNT_DATE, MyApplication.getGson().toJson(DateUtils.getRecordDays())).apply();
+            recordDays = DateUtils.getRecordDays();
+            MyApplication.getSp().edit().putString(Config.AMOUNT_DATE, MyApplication.getGson().toJson(recordDays)).apply();
         } else {
             recordDays = MyApplication.getGson().fromJson(json, new TypeToken<List<RecordDay>>() {
             }.getType());
+            boolean exist = false;
+            for (RecordDay days : recordDays) {
+                if (days.getName().equals(year + "年-" + month + "月")) {
+                    exist = true;
+                }
+            }
+            if (!exist) {
+                recordDays = DateUtils.getRecordDays(this.recordDays);
+                MyApplication.getSp().edit().putString(Config.AMOUNT_DATE, MyApplication.getGson().toJson(recordDays)).apply();
+            }
         }
-        month = DateUtils.getSystemMonth();
 
         rv_date = view.findViewById(R.id.rv_date);
         tv_date = view.findViewById(R.id.tv_date);
@@ -90,16 +102,10 @@ public class MyDateView extends ConstraintLayout {
             @Override
             protected void convert(BaseViewHolder helper, RecordDay.Days item) {
                 int normal = getResources().getColor(R.color.color_333333);
-                int record = getResources().getColor(R.color.color_009C84);
+                int record = getResources().getColor(R.color.color_ff0000);
                 helper.setTextColor(R.id.tv_day, item.isPunch() ? record : normal).setText(R.id.tv_day, item.getDay());
             }
         });
-        for (RecordDay recordDay : recordDays) {
-            if (recordDay.getName().equals(tv_date.getText().toString())) {
-                adapter.setNewData(recordDay.getDaysList());
-                break;
-            }
-        }
     }
 
     public void setData(List<PunchDetail> punchDetails) {
@@ -110,6 +116,7 @@ public class MyDateView extends ConstraintLayout {
         adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter baseQuickAdapter, View view, int position) {
+                EventUtils.post(Config.PUNCH_DATE_DETAIL, null);
                 for (PunchDetail detail : punchDetails) {
                     if (detail.getDate().equals(tv_date.getText().toString())) {
                         String day = adapter.getData().get(position).getDay();
@@ -139,7 +146,7 @@ public class MyDateView extends ConstraintLayout {
                     month++;
                 }
                 tv_date.setText(year + "年-" + month + "月");
-                getData(tv_date.getText().toString());
+                getData();
             }
         });
         last.setOnClickListener(new OnClickListener() {
@@ -155,17 +162,39 @@ public class MyDateView extends ConstraintLayout {
                     month--;
                 }
                 tv_date.setText(year + "年-" + month + "月");
-                getData(tv_date.getText().toString());
+                getData();
             }
         });
     }
 
-    private void getData(String date) {
-        for (RecordDay day : recordDays) {
-            if (day.getName().equals(date)){
-                adapter.setNewData(day.getDaysList());
-                return;
+    public void getData() {
+        PunchDetail punchDetail = null;
+        List<RecordDay.Days> daysList = null;
+        for (PunchDetail detail : punchDetails) {
+            if (detail.getDate().equals(tv_date.getText().toString())) {
+                punchDetail = detail;
             }
+        }
+        for (RecordDay recordDay : recordDays) {
+            if (recordDay.getName().equals(tv_date.getText().toString())) {
+                daysList = recordDay.getDaysList();
+                break;
+            }
+        }
+        if (daysList != null) {
+            if (punchDetail != null) {
+                if (punchDetail.getDate().equals(tv_date.getText().toString())) {
+                    List<PunchDetail.Days> days = punchDetail.getDays();
+                    for (PunchDetail.Days day : days) {
+                        for (RecordDay.Days record : daysList) {
+                            if (day.getDay().equals(record.getDay())) {
+                                record.setPunch(true);
+                            }
+                        }
+                    }
+                }
+            }
+            adapter.setNewData(daysList);
         }
     }
 }

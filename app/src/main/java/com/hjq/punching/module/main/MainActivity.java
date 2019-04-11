@@ -1,11 +1,9 @@
 package com.hjq.punching.module.main;
 
-
-import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,30 +13,31 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.hjq.punching.MyApplication;
 import com.hjq.punching.R;
 import com.hjq.punching.adapter.PunchRecodeAdapter;
 import com.hjq.punching.base.BaseActivity;
 import com.hjq.punching.base.BaseEvent;
-import com.hjq.punching.bean.PunchDetail;
 import com.hjq.punching.bean.PunchRecord;
 import com.hjq.punching.module.detail.DetailActivity;
 import com.hjq.punching.weight.Config;
-import com.hjq.punching.weight.util.DateUtils;
+import com.hjq.punching.weight.dialog.CreateDialog;
+import com.hjq.punching.weight.util.ToastUtils;
 import com.hjq.punching.weight.view.MyPopupWindow;
 import com.hjq.punching.weight.view.MyTitleBar;
 import com.hjq.punching.weight.util.SpUtils;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity implements MainContract.MainView {
+    private MainContract.MainPresenter mPresenter;
+
+    public static boolean CURRENT_ACTIVITY = true;
 
     @BindView(R.id.title_bar)
     MyTitleBar titleBar;
@@ -53,6 +52,10 @@ public class MainActivity extends BaseActivity {
     private PunchRecodeAdapter recodeAdapter;
     private List<PunchRecord> recordList;
 
+    private boolean isOpen = false;
+
+    private CreateDialog dialog;
+
     @Override
     protected int setLayout() {
         return R.layout.activity_main;
@@ -60,6 +63,9 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void initView() {
+        mPresenter = new MainPresenter();
+        ((MainPresenter) mPresenter).setView(this);
+
         recodeAdapter = new PunchRecodeAdapter();
         rvRecord.setLayoutManager(new LinearLayoutManager(this));
         rvRecord.setAdapter(recodeAdapter);
@@ -89,7 +95,7 @@ public class MainActivity extends BaseActivity {
         titleBar.setOnTitleBarClickListener(new MyTitleBar.OnTitleBarClickListener() {
             @Override
             public void onBack() {
-                finish();
+
             }
 
             @Override
@@ -102,12 +108,18 @@ public class MainActivity extends BaseActivity {
                 popupWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
                 popupWindow.setBackgroundDrawable(new ColorDrawable());
                 popupWindow.show(setting);
+                if (isOpen){
+                    popupWindow.dismiss();
+                    isOpen = false;
+                    return;
+                }
+                isOpen = true;
             }
         });
         recodeAdapter.setOnItemClickListener(new PunchRecodeAdapter.OnItemClickListener() {
             @Override
             public void onRecord(String name) {
-                startActivity(new Intent(MainActivity.this, DetailActivity.class));
+
             }
         });
         recodeAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
@@ -118,67 +130,8 @@ public class MainActivity extends BaseActivity {
                         num++;
                         setText();
                         recodeAdapter.updatePunch(position);
-                        SpUtils.putSp(Config.PUNCH_RECORD, MyApplication.getGson().toJson(recodeAdapter.getData()));
-
-                        String name = recodeAdapter.getData().get(position).getName();
-                        List<PunchDetail> detailList;
-                        PunchDetail.Days.DetailBean bean = new PunchDetail.Days.DetailBean();
-
-                        bean.setName(name);
-                        bean.setTime(DateUtils.getSystemDate());
-                        bean.setRemark("");
-
                         String json = getPunch_detail(Config.PUNCH_RECORD_DATE);
-                        if (!TextUtils.isEmpty(json)) {
-                            String date = DateUtils.getSystemYear() + "年-" + DateUtils.getSystemMonth() + "月";
-                            detailList = MyApplication.getGson().fromJson(json, new TypeToken<List<PunchDetail>>() {
-                            }.getType());
-
-                            boolean isDayExist = false;
-                            for (PunchDetail pd : detailList) {
-                                if (pd.getDate().equals(date)) {
-                                    for (PunchDetail.Days days : pd.getDays()) {
-                                        if (days.getDay().equals(DateUtils.getDays() + "")) {
-                                            List<PunchDetail.Days.DetailBean> detail = days.getDetailBeans();
-                                            detail.add(bean);
-                                            isDayExist = true;
-                                            break;
-                                        }
-                                    }
-                                    if (!isDayExist) {
-                                        List<PunchDetail.Days> daysList = pd.getDays();
-                                        PunchDetail.Days days = new PunchDetail.Days();
-                                        days.setDay(DateUtils.getDays() + "");
-
-                                        List<PunchDetail.Days.DetailBean> detail = new ArrayList<>();
-                                        detail.add(bean);
-
-                                        days.setDetailBeans(detail);
-                                        daysList.add(days);
-                                    }
-                                    break;
-                                }
-                            }
-                        } else {
-                            detailList = new ArrayList<>();
-                            List<PunchDetail.Days> daysList = new ArrayList<>();
-                            List<PunchDetail.Days.DetailBean> detailBeanList = new ArrayList<>();
-
-                            detailBeanList.add(bean);
-
-                            PunchDetail.Days days = new PunchDetail.Days();
-                            days.setDay(DateUtils.getDays() + "");
-                            days.setDetailBeans(detailBeanList);
-                            daysList.add(days);
-
-                            PunchDetail punchDetail = new PunchDetail();
-                            punchDetail.setDate(DateUtils.getSystemYear() + "年-" + DateUtils.getSystemMonth() + "月");
-                            punchDetail.setDays(daysList);
-
-                            detailList.add(punchDetail);
-                        }
-
-                        SpUtils.putSp(Config.PUNCH_RECORD_DATE, MyApplication.getGson().toJson(detailList));
+                        mPresenter.clickPunch(recodeAdapter, position, json);
                         break;
                 }
             }
@@ -200,10 +153,72 @@ public class MainActivity extends BaseActivity {
     public void onEvent(BaseEvent event) {
         super.onEvent(event);
         if (event.getString().equals(Config.CREATE_RECORD)) {
-            List<PunchRecord> punchRecords = (List<PunchRecord>) event.getObject();
-            recodeAdapter.addData(punchRecords);
-            setText();
-            SpUtils.putSp(Config.PUNCH_RECORD, MyApplication.getGson().toJson(recodeAdapter.getData()));
+            if (dialog == null) {
+                dialog = new CreateDialog();
+            }
+            dialog.showCenter(this);
+            dialog.setOnContentClickListener(new CreateDialog.OnContentClickListener() {
+                @Override
+                public void onContent(String str) {
+                    if (TextUtils.isEmpty(str)) {
+                        ToastUtils.showToast("请输入名称~");
+                        return;
+                    }
+                    for (PunchRecord record : recodeAdapter.getData()) {
+                        if (record.getName().equals(str)) {
+                            ToastUtils.showToast("存在此打卡~");
+                            return;
+                        }
+                    }
+                    List<PunchRecord> punchRecords = new ArrayList<>();
+                    PunchRecord record = new PunchRecord();
+                    record.setName(str);
+                    record.setPunch(false);
+                    punchRecords.add(record);
+                    recodeAdapter.addData(punchRecords);
+                    setText();
+                    SpUtils.putSp(Config.PUNCH_RECORD, MyApplication.getGson().toJson(recodeAdapter.getData()));
+                    dialog.clearText();
+                    dialog.hideDialog();
+                    rvRecord.smoothScrollToPosition(recodeAdapter.getData().size() - 1);
+                }
+            });
+        } else if (event.getString().equals(Config.SELECT_DETAIL)) {
+            String json = MyApplication.getSp().getString(Config.PUNCH_RECORD_DATE, "");
+            if (!TextUtils.isEmpty(json)) {
+                Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+                startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+            }
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (!CURRENT_ACTIVITY) {
+            titleBar.setAnimation();
+            CURRENT_ACTIVITY = true;
+        }
+    }
+
+    @Override
+    public void showToast() {
+
+    }
+
+    @Override
+    public void showMsg() {
+
+    }
+
+    @Override
+    public void showLoading() {
+
+    }
+
+    @Override
+    public void hideLoading() {
+
     }
 }

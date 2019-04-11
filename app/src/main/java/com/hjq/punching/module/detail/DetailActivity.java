@@ -1,9 +1,13 @@
 package com.hjq.punching.module.detail;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.google.gson.reflect.TypeToken;
 import com.hjq.punching.MyApplication;
@@ -12,10 +16,9 @@ import com.hjq.punching.adapter.PunchDetailAdapter;
 import com.hjq.punching.base.BaseActivity;
 import com.hjq.punching.base.BaseEvent;
 import com.hjq.punching.bean.PunchDetail;
-import com.hjq.punching.bean.RecordDay;
+import com.hjq.punching.module.main.MainActivity;
 import com.hjq.punching.weight.Config;
-import com.hjq.punching.weight.MyDividerItem;
-import com.hjq.punching.weight.util.DateUtils;
+import com.hjq.punching.weight.dialog.LoadingDialog;
 import com.hjq.punching.weight.view.MyDateView;
 import com.hjq.punching.weight.view.MyTitleBar;
 
@@ -24,6 +27,8 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.chad.library.adapter.base.BaseQuickAdapter.SCALEIN;
 
 /**
  * @Describe：
@@ -40,6 +45,7 @@ public class DetailActivity extends BaseActivity {
 
     private List<PunchDetail> details;
     private PunchDetailAdapter detailAdapter;
+    private LoadingDialog dialog;
 
     @Override
     protected int setLayout() {
@@ -53,10 +59,15 @@ public class DetailActivity extends BaseActivity {
         }.getType());
 
         dateView.setData(details);
+        dateView.getData();
 
         detailAdapter = new PunchDetailAdapter();
         rvDateDetail.setLayoutManager(new LinearLayoutManager(this));
         rvDateDetail.setAdapter(detailAdapter);
+
+        setEmpty();
+        detailAdapter.openLoadAnimation(SCALEIN);
+        detailAdapter.isFirstOnly(false);
     }
 
     @Override
@@ -64,7 +75,9 @@ public class DetailActivity extends BaseActivity {
         titleBar.setOnTitleBarClickListener(new MyTitleBar.OnTitleBarClickListener() {
             @Override
             public void onBack() {
+                MainActivity.CURRENT_ACTIVITY = false;
                 finish();
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
             }
 
             @Override
@@ -74,12 +87,36 @@ public class DetailActivity extends BaseActivity {
         });
     }
 
+    private void setEmpty() {
+        View emptyView = getLayoutInflater().inflate(R.layout.item_empty_view, null);
+        emptyView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+        TextView textView = emptyView.findViewById(R.id.tv_empty);
+        textView.setText("当日无打卡记录~");
+        detailAdapter.setEmptyView(emptyView);
+    }
+
     @Override
-    public void onEvent(BaseEvent event) {
+    public void onEvent(final BaseEvent event) {
         super.onEvent(event);
         if (event.getString().equals(Config.PUNCH_DATE_DETAIL)) {
-            List<PunchDetail.Days.DetailBean> detailBean = (List<PunchDetail.Days.DetailBean>) event.getObject();
-            detailAdapter.setNewData(detailBean);
+            if (dialog == null) {
+                dialog = new LoadingDialog();
+            }
+            dialog.showCenter(this);
+            dialog.setOnDismissListener(new LoadingDialog.OnDismissListener() {
+                @Override
+                public void onDismiss() {
+                    dialog.dismiss();
+                    if (event.getObject() == null) {
+                        detailAdapter.setNewData(new ArrayList<PunchDetail.Days.DetailBean>());
+                        return;
+                    }
+                    List<PunchDetail.Days.DetailBean> detailBean = (List<PunchDetail.Days.DetailBean>) event.getObject();
+                    detailAdapter.setNewData(detailBean);
+                }
+            });
+
         }
     }
 

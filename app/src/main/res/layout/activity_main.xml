@@ -14,7 +14,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:show_image="true"
+        app:show_setting_image="true"
         app:title_text="@string/text_record" />
 
     <TextView

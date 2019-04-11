@@ -6,6 +6,15 @@ import android.support.constraint.ConstraintLayout;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.AnticipateInterpolator;
+import android.view.animation.AnticipateOvershootInterpolator;
+import android.view.animation.BounceInterpolator;
+import android.view.animation.CycleInterpolator;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.OvershootInterpolator;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,8 +31,8 @@ public class MyTitleBar extends ConstraintLayout {
     private TextView tvTitle;
 
     private String mTitleText;
-    private boolean isShowImage;
-    private int image;
+    private boolean isShowSettingImage;
+    private boolean isShowBackImage;
 
     private OnTitleBarClickListener listener;
 
@@ -81,8 +90,17 @@ public class MyTitleBar extends ConstraintLayout {
         });
     }
 
-    public void setTvTitle(String str) {
-        tvTitle.setText(str);
+    public void setAnimation() {
+        Animation animation = new TranslateAnimation(-300, 0, 0, 0);
+        setAnimations(animation);
+        tvTitle.setAnimation(animation);
+    }
+
+    private void setAnimations(Animation animation) {
+        animation.setDuration(1000);
+        animation.setInterpolator(new BounceInterpolator());
+        animation.setFillEnabled(true);//使其可以填充效果从而不回到原地
+        animation.setFillAfter(true);//不回到起始位置
     }
 
     private void initAttrs(Context context, AttributeSet attrs) {
@@ -92,10 +110,12 @@ public class MyTitleBar extends ConstraintLayout {
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.MyTitleBar);
         if (ta != null) {
             mTitleText = ta.getString(R.styleable.MyTitleBar_title_text);
-            isShowImage = ta.getBoolean(R.styleable.MyTitleBar_show_image, false);
+            isShowSettingImage = ta.getBoolean(R.styleable.MyTitleBar_show_setting_image, false);
+            isShowBackImage = ta.getBoolean(R.styleable.MyTitleBar_show_back_image, false);
             ta.recycle();
         }
         tvTitle.setText(mTitleText);
-        constraint_setting.setVisibility(isShowImage ? View.VISIBLE : View.GONE);
+        constraint_setting.setVisibility(isShowSettingImage ? View.VISIBLE : View.GONE);
+        constraint_back.setVisibility(isShowBackImage ? View.VISIBLE : View.GONE);
     }
 }

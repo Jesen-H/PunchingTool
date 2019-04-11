@@ -9,12 +9,13 @@
         android:id="@+id/title_bar"
         android:layout_width="match_parent"
         android:layout_height="50dp"
+        app:show_back_image="true"
         app:title_text="@string/text_record_detail" />
 
     <com.hjq.punching.weight.view.MyDateView
         android:id="@+id/date_view"
         android:layout_width="0dp"
-        android:layout_height="@dimen/y480"
+        android:layout_height="@dimen/y520"
         android:layout_margin="@dimen/x80"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

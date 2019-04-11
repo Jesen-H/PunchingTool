@@ -37,8 +37,8 @@ public class MyPopupWindow extends PopupWindow {
     private RecyclerView rv_setting;
 
     private SettingAdapter adapter;
-    private int[] icon = new int[]{1, 2};
-    private String[] name = new String[]{"创建打卡", "编辑"};
+    private int[] icon = new int[]{1, 2, 3};
+    private String[] name = new String[]{"创建打卡", "查看详情", "编辑"};
 
     public MyPopupWindow(Context context) {
         super(context);
@@ -71,12 +71,11 @@ public class MyPopupWindow extends PopupWindow {
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
                 switch (position) {
                     case 0:
-                        List<PunchRecord> punchRecords = new ArrayList<>();
-                        PunchRecord record = new PunchRecord();
-                        record.setName("测试");
-                        record.setPunch(false);
-                        punchRecords.add(record);
-                        EventUtils.post(Config.CREATE_RECORD, punchRecords);
+                        EventUtils.post(Config.CREATE_RECORD);
+                        dismiss();
+                        break;
+                    case 1:
+                        EventUtils.post(Config.SELECT_DETAIL);
                         dismiss();
                         break;
                 }

@@ -5,4 +5,9 @@
     <string name="text_record_detail">打卡详情</string>
     <string name="text_add_data">请添加数据哦~</string>
     <string name="text_tv_record">打卡</string>
+    <string name="dialog_loading">加载中...</string>
+    <string name="create_punch">创建打卡</string>
+    <string name="input_name">请输入名称...</string>
+    <string name="text_cancel">取消</string>
+    <string name="text_submit">确定</string>
 </resources>

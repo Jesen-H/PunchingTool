@@ -2,6 +2,7 @@
 <resources>
     <declare-styleable name="MyTitleBar">
         <attr name="title_text" format="integer" />
-        <attr name="show_image" format="boolean" />
+        <attr name="show_setting_image" format="boolean" />
+        <attr name="show_back_image" format="boolean" />
     </declare-styleable>
 </resources>
