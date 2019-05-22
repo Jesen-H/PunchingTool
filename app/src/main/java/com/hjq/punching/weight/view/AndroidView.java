@@ -29,42 +29,45 @@ public class AndroidView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+        int halfWidth = getWidth() / 2;
+        int halfHeight = getHeight() / 2;
+
         canvas.drawColor(Color.WHITE);
         paint.setAntiAlias(true);
         paint.setColor(Color.parseColor("#B3E723"));
 
         //头部
-        rectF.set(getWidth() / 2 - 50, getHeight() / 2 - 50, getWidth() / 2 + 50, getHeight() / 2 + 50);
+        rectF.set(halfWidth - 50, halfHeight - 50, halfWidth + 50, halfHeight + 50);
         canvas.drawArc(rectF, 0, -180, true, paint);
 
         //眼睛
         paint.setColor(Color.WHITE);
-        canvas.drawCircle(getWidth() / 2 - 25, getHeight() / 2 - 25, 5, paint);
-        canvas.drawCircle(getWidth() / 2 + 25, getHeight() / 2 - 25, 5, paint);
+        canvas.drawCircle(halfWidth - 25, halfHeight - 25, 5, paint);
+        canvas.drawCircle(halfWidth + 25, halfHeight - 25, 5, paint);
 
         //触角
         paint.setColor(Color.parseColor("#B3E723"));
         paint.setStrokeWidth(5f);
         paint.setStrokeCap(Paint.Cap.ROUND);
-        canvas.drawLine((getWidth() / 2) - 35, (getHeight() / 2) - 60, (getWidth() / 2) - 5, (getHeight() / 2) - 10, paint);
-        canvas.drawLine((getWidth() / 2) + 35, (getHeight() / 2) - 60, (getWidth() / 2) + 5, (getHeight() / 2) - 10, paint);
+        canvas.drawLine(halfWidth - 35, halfHeight - 60, halfWidth - 5, halfHeight - 10, paint);
+        canvas.drawLine(halfWidth + 35, halfHeight - 60, halfWidth + 5, halfHeight - 10, paint);
 
         //身体
-        rectF.set((getWidth() / 2) - 50, (getHeight() / 2) + 8, (getWidth() / 2) + 50, (getHeight() / 2) + 60);
+        rectF.set(halfWidth - 50, halfHeight + 8, halfWidth + 50, halfHeight + 60);
         canvas.drawRect(rectF, paint);
-        rectF.set((getWidth() / 2) - 50, (getHeight() / 2) + 50, (getWidth() / 2) + 50, (getHeight() / 2) + 90);
+        rectF.set(halfWidth - 50, halfHeight + 50, halfWidth + 50, halfHeight + 90);
         canvas.drawRoundRect(rectF, 10, 10, paint);
 
         //手
-        rectF.set((getWidth() / 2) - 75, (getHeight() / 2) + 6, (getWidth() / 2) - 55, (getHeight() / 2) + 80);
+        rectF.set(halfWidth - 75, halfHeight + 6, halfWidth - 55, halfHeight + 80);
         canvas.drawRoundRect(rectF, 10, 10, paint);
-        rectF.set((getWidth() / 2) + 55, (getHeight() / 2) + 6, (getWidth() / 2) + 75, (getHeight() / 2) + 80);
+        rectF.set(halfWidth + 55, halfHeight + 6, halfWidth + 75, halfHeight + 80);
         canvas.drawRoundRect(rectF, 10, 10, paint);
 
         //腿
-        rectF.set((getWidth() / 2) - 33, (getHeight() / 2) + 80, (getWidth() / 2) - 10, (getHeight() / 2) + 135);
+        rectF.set(halfWidth - 33, halfHeight + 80, halfWidth - 10, halfHeight + 135);
         canvas.drawRoundRect(rectF, 10, 10, paint);
-        rectF.set((getWidth() / 2) + 10, (getHeight() / 2) + 80, (getWidth() / 2) + 33, (getHeight() / 2) + 135);
+        rectF.set(halfWidth + 10, halfHeight + 80, halfWidth + 33, halfHeight + 135);
         canvas.drawRoundRect(rectF, 10, 10, paint);
     }
 }
